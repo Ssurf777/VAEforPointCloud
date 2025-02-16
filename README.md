@@ -18,6 +18,7 @@ VAEforPointCloud/
 │   └── visualize_loss.py      # Functions for visualizing training loss and results
 ├── main_for_standardVAE.ipynb # Main VAE script for training and evaluation
 ├── main_for_MoGVAE.ipynb      # Main MoG-VAE script for training and evaluation
+├── main_for_VQVAE.ipynb       # Main VQ-VAE script for training and evaluation
 ├── requirements.txt           # List of required Python packages
 └── README.md                  # Project description
 ~~~
