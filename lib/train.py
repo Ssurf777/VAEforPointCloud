@@ -17,6 +17,7 @@ def train(vae, data_loader, optimizer, epochs=5000, interval=100, device='cuda')
     for epoch in range(epochs):
         vae.train()
         loss_rec, loss_reg, loss_total = 0, 0, 0
+        batch_count = 0 
         for k, (x,) in enumerate(data_loader):
             x = x.to(device).squeeze(0)
             y, z, mu, logvar = vae(x)
@@ -28,11 +29,12 @@ def train(vae, data_loader, optimizer, epochs=5000, interval=100, device='cuda')
             loss_rec += lrec.item()
             loss_reg += lreg.item()
             loss_total += loss.item()
+            batch_count += 1
             if epoch == epochs - 1:
                 z_list.append(z.cpu().detach().numpy())
-        loss_rec /= (k + 1)
-        loss_reg /= (k + 1)
-        loss_total /= (k + 1)
+        loss_rec /= batch_count
+        loss_reg /= batch_count
+        loss_total /= batch_count
         rec_error_record.append(loss_rec)
         reg_error_record.append(loss_reg)
         total_error_record.append(loss_total)
