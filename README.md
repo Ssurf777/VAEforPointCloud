@@ -16,6 +16,7 @@ VAEforPointCloud/
 │   ├── vae_models.py          # Standard VAE model (standVAE)
 │   ├── vqvae_models.py        # VQ-VAE model
 │   └── visualize_loss.py      # Functions for visualizing training loss and results
+|
 ├── main_for_standardVAE.ipynb # Main VAE script for training and evaluation
 ├── main_for_MoGVAE.ipynb      # Main MoG-VAE script for training and evaluation
 ├── main_for_VQVAE.ipynb       # Main VQ-VAE script for training and evaluation
