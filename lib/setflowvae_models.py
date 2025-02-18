@@ -7,23 +7,36 @@ class ISAB(nn.Module):
     def __init__(self, dim_in, dim_out, num_heads=4, num_inducing_points=16):
         super(ISAB, self).__init__()
         self.inducing_points = nn.Parameter(torch.randn(num_inducing_points, dim_out))
-        self.multihead_attn1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=True)
-        self.multihead_attn2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=True)
+        self.multihead_attn1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=False)
+        self.multihead_attn2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=False)
         self.linear = nn.Linear(dim_in, dim_out)
 
     def forward(self, X):
         print(f"ISAB Input shape: {X.shape}")  # (batch_size, num_points, feature_dim)
-        
+
         X = self.linear(X)  # (batch_size, num_points, dim_out)
         print(f"After Linear X: {X.shape}") 
 
-        # MultiheadAttention に適した形状に変換
-        H, _ = self.multihead_attn1(self.inducing_points.unsqueeze(0).expand(X.size(0), -1, -1), X, X)
-        print(f"After first MultiheadAttention: {H.shape}")  
+        # PyTorchのMultiheadAttentionの形式に変更 (sequence_length, batch_size, embed_dim)
+        X = X.permute(1, 0, 2)  # (num_points, batch_size, dim_out)
+        print(f"Permuted X: {X.shape}")
+
+        # Queryの形を (num_points, batch_size, dim_out) に調整
+        query = self.inducing_points.unsqueeze(1).expand(-1, X.size(1), -1)  # (num_inducing_points, batch_size, dim_out)
+        print(f"Query shape: {query.shape}")
+
+        H, _ = self.multihead_attn1(query, X, X)
+        print(f"After first MultiheadAttention: {H.shape}")  # (num_inducing_points, batch_size, dim_out)
 
         Y, _ = self.multihead_attn2(X, H, H)
-        print(f"After second MultiheadAttention: {Y.shape}")  
+        print(f"After second MultiheadAttention: {Y.shape}")  # (num_points, batch_size, dim_out)
+
+        # 元の形に戻す
+        Y = Y.permute(1, 0, 2)  # (batch_size, num_points, dim_out)
+        print(f"Final Output Y: {Y.shape}")
+
         return Y
+
 
 
 class PlanarFlow(nn.Module):
