@@ -19,29 +19,28 @@ class ISAB(nn.Module):
         self.linear = nn.Linear(dim_in, dim_out)
 
     def forward(self, X):
-        print(f"ISAB Input shape: {X.shape}")  # (batch_size, num_points, feature_dim)
-
+        # print(f"ISAB Input shape: {X.shape}")  # (batch_size, num_points, feature_dim)
         X = self.linear(X)  # (batch_size, num_points, dim_out)
-        print(f"After Linear X: {X.shape}") 
+        # print(f"After Linear X: {X.shape}") 
 
         # PyTorchのMultiheadAttentionの形式に変更 (sequence_length, batch_size, embed_dim)
         X = X.permute(1, 0, 2)  # (num_points, batch_size, dim_out)
-        print(f"Permuted X for MHA: {X.shape}")  
+        # print(f"Permuted X for MHA: {X.shape}")  
 
         # `inducing_points` をバッチサイズに適用
         query = self.inducing_points.unsqueeze(1).expand(-1, X.size(1), -1)  # (num_inducing_points, batch_size, dim_out)
-        print(f"Query shape: {query.shape}")
+        # print(f"Query shape: {query.shape}")
 
         # MultiheadAttention に適した `query, key, value`
         H, _ = self.multihead_attn1(query, X, X)  # (num_inducing_points, batch_size, dim_out)
-        print(f"After first MultiheadAttention: {H.shape}")  
+        # print(f"After first MultiheadAttention: {H.shape}")  
 
         Y, _ = self.multihead_attn2(X, H, H)  # (num_points, batch_size, dim_out)
-        print(f"After second MultiheadAttention: {Y.shape}")  
+        # print(f"After second MultiheadAttention: {Y.shape}")  
 
         # (num_points, batch_size, dim_out) → (batch_size, num_points, dim_out)
         Y = Y.permute(1, 0, 2)
-        print(f"Final Output Y: {Y.shape}")
+        # print(f"Final Output Y: {Y.shape}")
 
         return Y
 
