@@ -5,20 +5,26 @@ from torch.distributions import Normal
 
 class ISAB(nn.Module):
     def __init__(self, dim_in, dim_out, num_heads=4, num_inducing_points=16):
-        """
-        Induced Set Attention Block (ISAB)
-        """
         super(ISAB, self).__init__()
         self.inducing_points = nn.Parameter(torch.randn(num_inducing_points, dim_out))
-        self.multihead_attn1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
-        self.multihead_attn2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.multihead_attn1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=True)
+        self.multihead_attn2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=True)
         self.linear = nn.Linear(dim_in, dim_out)
 
     def forward(self, X):
-        X = self.linear(X)
-        H, _ = self.multihead_attn1(self.inducing_points.unsqueeze(1), X, X)
+        print(f"ISAB Input shape: {X.shape}")  # (batch_size, num_points, feature_dim)
+        
+        X = self.linear(X)  # (batch_size, num_points, dim_out)
+        print(f"After Linear X: {X.shape}") 
+
+        # MultiheadAttention に適した形状に変換
+        H, _ = self.multihead_attn1(self.inducing_points.unsqueeze(0).expand(X.size(0), -1, -1), X, X)
+        print(f"After first MultiheadAttention: {H.shape}")  
+
         Y, _ = self.multihead_attn2(X, H, H)
+        print(f"After second MultiheadAttention: {Y.shape}")  
         return Y
+
 
 class PlanarFlow(nn.Module):
     def __init__(self, dim):
