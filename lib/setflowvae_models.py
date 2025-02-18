@@ -3,10 +3,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class ISAB(nn.Module):
     def __init__(self, dim_in, dim_out, num_heads=4, num_inducing_points=16):
         super(ISAB, self).__init__()
+        self.num_heads = num_heads
+        self.head_dim = dim_out // num_heads  # 各ヘッドの次元
         self.inducing_points = nn.Parameter(torch.randn(num_inducing_points, dim_out))
+        
         self.multihead_attn1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=False)
         self.multihead_attn2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads, batch_first=False)
         self.linear = nn.Linear(dim_in, dim_out)
@@ -19,20 +26,21 @@ class ISAB(nn.Module):
 
         # PyTorchのMultiheadAttentionの形式に変更 (sequence_length, batch_size, embed_dim)
         X = X.permute(1, 0, 2)  # (num_points, batch_size, dim_out)
-        print(f"Permuted X: {X.shape}")
+        print(f"Permuted X for MHA: {X.shape}")  
 
-        # Queryの形を (num_points, batch_size, dim_out) に調整
+        # `inducing_points` をバッチサイズに適用
         query = self.inducing_points.unsqueeze(1).expand(-1, X.size(1), -1)  # (num_inducing_points, batch_size, dim_out)
         print(f"Query shape: {query.shape}")
 
-        H, _ = self.multihead_attn1(query, X, X)
-        print(f"After first MultiheadAttention: {H.shape}")  # (num_inducing_points, batch_size, dim_out)
+        # MultiheadAttention に適した `query, key, value`
+        H, _ = self.multihead_attn1(query, X, X)  # (num_inducing_points, batch_size, dim_out)
+        print(f"After first MultiheadAttention: {H.shape}")  
 
-        Y, _ = self.multihead_attn2(X, H, H)
-        print(f"After second MultiheadAttention: {Y.shape}")  # (num_points, batch_size, dim_out)
+        Y, _ = self.multihead_attn2(X, H, H)  # (num_points, batch_size, dim_out)
+        print(f"After second MultiheadAttention: {Y.shape}")  
 
-        # 元の形に戻す
-        Y = Y.permute(1, 0, 2)  # (batch_size, num_points, dim_out)
+        # (num_points, batch_size, dim_out) → (batch_size, num_points, dim_out)
+        Y = Y.permute(1, 0, 2)
         print(f"Final Output Y: {Y.shape}")
 
         return Y
