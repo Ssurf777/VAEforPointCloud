@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from chamfer_distance import ChamferDis
 
 class MoGVAE(nn.Module):
     def __init__(self, n_in_out, n_z, n_components=2):
@@ -90,7 +91,28 @@ class MoGVAE(nn.Module):
         rec_loss = F.mse_loss(y, x, reduction="sum")
         reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1)
         return rec_loss, reg_loss
+        
+    def loss2(self, y, x):
+        """
+        Compute loss2: MSE, Chamfer Distance, and KL Divergence.
+        Args:
+          y (Tensor): Reconstructed output (B, N, 3)
+          x (Tensor): Original input (B, N, 3)
+        Returns:
+          Tuple: mse_loss, chamfer_loss, kl_loss
+        """
+        device = y.device
+        # MSE Loss
+        mse_loss = F.mse_loss(y, x, reduction="mean")
+        # Chamfer Distance Loss
+        chamfer_loss = chamfer_distance(y, x)
+        # KL Divergence Loss 
+        kl_div =  0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1)
+       # Average over batch
+       kl_loss = kl_div.mean()
+       return mse_loss, chamfer_loss, kl_loss
 
+    
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
