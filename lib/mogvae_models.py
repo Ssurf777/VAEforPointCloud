@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from chamfer_distance import ChamferDis
+from ChamferDis import chamfer_distance
 
 class MoGVAE(nn.Module):
     def __init__(self, n_in_out, n_z, n_components=2):
