@@ -92,27 +92,49 @@ class MoGVAE(nn.Module):
         reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1)
         return rec_loss, reg_loss
         
-    def loss2(self, y, x):
-        """
-        Compute loss2: MSE, Chamfer Distance, and KL Divergence.
-        Args:
-          y (Tensor): Reconstructed output (B, N, 3)
-          x (Tensor): Original input (B, N, 3)
-        Returns:
-          Tuple: mse_loss, chamfer_loss, kl_loss
-        """
-        device = y.device
-        # MSE Loss
-        mse_loss = F.mse_loss(y, x, reduction="mean")
-        # Chamfer Distance Loss
-        chamfer_loss = chamfer_distance(y, x)
-        # KL Divergence Loss 
-        kl_div =  0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1)
-        # Average over batch
-        kl_loss = kl_div.mean()
-        return mse_loss, chamfer_loss, kl_loss
+    @staticmethod
+    def chamfer_distance(x, y):
+        # 入力の形状を確認
+        if x.dim() == 2:
+                x = x.view(1, x.size(0), x.size(1))  # バッチ次元を追加
+                y = y.view(1, y.size(0), y.size(1))
 
-    
+        # 次元を追加してペアワイズ距離を計算
+        x = x.unsqueeze(1)  # (B, 1, N, 3)
+        y = y.unsqueeze(2)  # (B, M, 1, 3)
+        dist = torch.norm(x - y, dim=-1)  # (B, M, N)
+
+        # 最小距離を計算
+        min_dist_x_to_y = torch.min(dist, dim=1)[0].mean(dim=1)  # (B,)
+        min_dist_y_to_x = torch.min(dist, dim=2)[0].mean(dim=1)  # (B,)
+
+        chamfer_dist = min_dist_x_to_y + min_dist_y_to_x  # 双方向の距離を合計
+        return chamfer_dist.mean()  # バッチ平均を返す
+
+    def loss2(self, y, x):
+
+        device = y.device
+        batch_size = 1
+
+        # MSE
+        mse_loss = F.mse_loss(y, x, reduction="sum")  # 再構成誤差をMSEで計算
+
+        # デバッグ: 変換前の形状
+        #print(f"Before reshaping: x.shape={x.shape}, y.shape={y.shape}")
+
+        # (N, 3) へ変換
+        x = x.view(-1, 3)
+        y = y.view(-1, 3)
+
+        # デバッグ: 変換後の形状
+        #print(f"After reshaping: x.shape={x.shape}, y.shape={y.shape}")
+        rec_loss = 0
+        rec_loss += self.chamfer_distance(x, y)
+
+        reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1) / batch_size
+        return mse_loss, rec_loss, reg_loss    
+
+        
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
