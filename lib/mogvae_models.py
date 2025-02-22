@@ -108,9 +108,9 @@ class MoGVAE(nn.Module):
         chamfer_loss = chamfer_distance(y, x)
         # KL Divergence Loss 
         kl_div =  0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1)
-       # Average over batch
-       kl_loss = kl_div.mean()
-       return mse_loss, chamfer_loss, kl_loss
+        # Average over batch
+        kl_loss = kl_div.mean()
+        return mse_loss, chamfer_loss, kl_loss
 
     
     def _init_weights(self):
