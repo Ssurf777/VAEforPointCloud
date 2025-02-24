@@ -16,6 +16,7 @@ class MoGVAE(nn.Module):
         """
         super(MoGVAE, self).__init__()
         self.n_components = n_components
+        self.num_points = num_points  # Store num_points for later use in decode
 
         # PointNet Encoder
         self.conv1 = nn.Conv1d(3, 64, kernel_size=1)
@@ -25,7 +26,7 @@ class MoGVAE(nn.Module):
         self.linear1 = nn.Linear(1024, 512)
         self.linear2 = nn.Linear(512, 256)
         self.linear3 = nn.Linear(256, 9)
-        self.enc_mu = nn.Linear(9, n_z * n_components)      # Dimension for É  multiplied by number of components
+        self.enc_mu = nn.Linear(9, n_z * n_components)      # Dimension for Œº multiplied by number of components
         self.enc_logvar = nn.Linear(9, n_z * n_components)   # Dimension for logvar similarly multiplied
         self.enc_pi = nn.Linear(9, n_components)             # Mixture coefficients
 
@@ -95,7 +96,7 @@ class MoGVAE(nn.Module):
         # The output shape is (B, 2048, 1), so adjust dimensions accordingly
         x = x.squeeze(2)
         x = self.dec3(x)
-        x = x.view(-1, num_points, 3)  # Reshape to (B, 5000, 3)
+        x = x.view(-1, self.num_points, 3)  # Reshape to (B, num_points, 3)
         return x
 
     def loss(self, y, x):
