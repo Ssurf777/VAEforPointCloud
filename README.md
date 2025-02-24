@@ -8,7 +8,8 @@ VAEforPointCloud/
 │   ├── Dataloader.py          # DataLoader for preparing training data
 │   ├── EarthMoversDis.py      # Earth Mover's Distance calculation
 │   ├── file_io.py             # File input/output functions for reading OFF files
-│   ├── mogvae_models.py       # Mixture of Gaussians VAE model (MoGVAE)
+│   ├── mogvae_models.py       # Mixture of Gaussians VAE model (MoGVAE) for flattened input
+│   ├── **mogvae_v2_models.py**    # Mixture of Gaussians VAE model (MoGVAE) for non-flattened input
 │   ├── point_cloud.py         # Functions for point cloud visualization and rotation
 │   ├── sampling.py            # PointSampler class for point cloud data
 │   ├── train.py               # Training function for VAE models
