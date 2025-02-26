@@ -55,17 +55,27 @@ class standVAE(nn.Module):
         return z, mu, logvar
 
     def decode(self, z):
-        device = z.device  # デバイスを取得
+        device = z.device
+        # Assume the shape of z is (B, n_z)
         x = F.leaky_relu(self.dec1(z), negative_slope=0.001)
         x = F.leaky_relu(self.dec2(x), negative_slope=0.001)
+        # Reshape to (B, 512, 1) to suit ConvTranspose1d
         x = x.unsqueeze(2)
         x = F.leaky_relu(self.dconv1(x), negative_slope=0.001)
         x = F.leaky_relu(self.dconv2(x), negative_slope=0.001)
-        x = x.squeeze(2)
-        x = self.dec3(x)  # 最終的な出力層
+        # Check if we need to squeeze
+        if x.shape[2] == 1:
+                x = x.squeeze(2)
+        print("Before dec3:", x.shape)  # デバッグ用
+        x = self.dec3(x)
+        print("After dec3:", x.shape)  # デバッグ用
+        # Ensure reshape is valid
+        print("Before reshape:", x.shape)  # デバッグ用
+        assert x.shape[1] == self.num_points * 3, f"Shape mismatch: {x.shape[1]} != {self.num_points * 3}"
         x = x.view(-1, self.num_points, 3)
+        print("After reshape:", x.shape)  # デバッグ用
         return x
-
+        
     def loss(self, y, x, mu, logvar):
         rec_loss = F.mse_loss(y, x, reduction="sum")  # 再構成誤差をMSEで計算
         reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)  # 正則化項
