@@ -67,7 +67,7 @@ class standVAE(nn.Module):
         if x.shape[2] == 1:
                 x = x.squeeze(2)
         print("Before dec3:", x.shape)  # デバッグ用
-        x = self.dec3(x)
+        x = self.dec_out(x)
         print("After dec3:", x.shape)  # デバッグ用
         # Ensure reshape is valid
         print("Before reshape:", x.shape)  # デバッグ用
