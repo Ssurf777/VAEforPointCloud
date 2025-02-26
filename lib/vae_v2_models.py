@@ -63,7 +63,7 @@ class standVAE(nn.Module):
         x = F.leaky_relu(self.dconv2(x), negative_slope=0.001)
         x = x.squeeze(2)
         x = self.dec3(x)  # 最終的な出力層
-	x = x.view(-1, self.num_points, 3)
+        x = x.view(-1, self.num_points, 3)
         return x
 
     def loss(self, y, x, mu, logvar):
