@@ -58,7 +58,7 @@ class standVAE(nn.Module):
         device = z.device  # デバイスを取得
         x = F.leaky_relu(self.dec1(z), negative_slope=0.001)
         x = F.leaky_relu(self.dec2(x), negative_slope=0.001)
-        x = x.unsqueeze(0).unsqueeze(2)
+        x = x.unsqueeze(2)
         x = F.leaky_relu(self.dconv1(x), negative_slope=0.001)
         x = F.leaky_relu(self.dconv2(x), negative_slope=0.001)
         x = x.squeeze(2)
