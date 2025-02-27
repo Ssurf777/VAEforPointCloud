@@ -66,14 +66,14 @@ class standVAE(nn.Module):
         # Check if we need to squeeze
         if x.shape[2] == 1:
                 x = x.squeeze(2)
-        print("Before dec3:", x.shape)  # デバッグ用
+        # print("Before dec3:", x.shape)  # デバッグ用
         x = self.dec_out(x)
-        print("After dec3:", x.shape)  # デバッグ用
+        # print("After dec3:", x.shape)  # デバッグ用
         # Ensure reshape is valid
-        print("Before reshape:", x.shape)  # デバッグ用
+        # print("Before reshape:", x.shape)  # デバッグ用
         assert x.shape[1] == self.num_points * 3, f"Shape mismatch: {x.shape[1]} != {self.num_points * 3}"
         x = x.view(-1, self.num_points, 3)
-        print("After reshape:", x.shape)  # デバッグ用
+        # print("After reshape:", x.shape)  # デバッグ用
         return x
         
     def loss(self, y, x, mu, logvar):
