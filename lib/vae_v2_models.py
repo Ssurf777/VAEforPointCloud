@@ -5,7 +5,7 @@ import torch.nn.functional as F
 class standVAE(nn.Module):
     def __init__(self, num_points = 5000, n_z = 3):
         super(standVAE, self).__init__()
-
+        self.num_points = num_points
         # PointNet Encoder
         self.conv1 = nn.Conv1d(3, 64, kernel_size=1)
         self.conv2 = nn.Conv1d(64, 128, kernel_size=1)
