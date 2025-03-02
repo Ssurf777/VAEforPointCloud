@@ -19,13 +19,10 @@ VAEforPointCloud/
 │   ├── vqvae_models.py        # VQ-VAE model
 │   └── visualize_loss.py      # Functions for visualizing training loss and results
 |
-├── main_for_standardVAE(MSE).ipynb     # Main VAE script for training and evaluation ( Loss function MSE + KL_D ) for flattened input
 ├── main_for_standardVAE_v2_(MSE).ipynb # Main VAE script for training and evaluation ( Loss function MSE + KL_D ) for non-flattened input
-├── main_for_MoGVAE(MSE).ipynb          # Main MoG-VAE script for training and evaluation ( Loss function MSE + KL_D ) for flattened input
 ├── main_for_MoGVAE_v2_(MSE).ipynb      # Main MoG-VAE script for training and evaluation ( Loss function MSE + KL_D ) for non-flattened input
-├── main_for_MoGVAE(MSE+CD).ipynb       # Main MoG-VAE script for training and evaluation ( Loss function MSE + CD+ KL_D ) for flattened input
 ├── main_for_MoGVAE_v2_(MSE+CD).ipynb   # Main MoG-VAE script for training and evaluation ( Loss function MSE + CD+ KL_D ) for non-flattened input
-├── main_for_VQVAE.ipynb                # Main VQ-VAE script for training and evaluation
+├── main_for_VQVAE_v2_(MSE).ipynb       # Main VQ-VAE script for training and evaluation ( Loss function MSE ) for non-flattened input
 ├── requirements.txt                    # List of required Python packages
 └── README.md                           # Project description
 ~~~
