@@ -15,11 +15,12 @@ class VQVAE(nn.Module):
             num_embeddings (int): The number of embedding vectors in the codebook.
         """
         super(VQVAE, self).__init__()
-        self._init_weights()
+
         self.n_dim = n_dim
         self.num_points = num_points
         self.embedding_dim = embedding_dim
-
+        self.num_embeddings = num_embeddings
+        
         # Encoder
         self.encoder = nn.Sequential(
             nn.Conv1d(n_dim, 64, kernel_size=1),
@@ -29,15 +30,7 @@ class VQVAE(nn.Module):
             nn.Conv1d(128, embedding_dim, kernel_size=1),
             nn.AdaptiveMaxPool1d(1)
         )
-    def _init_weights(self):
-        """
-        Applies He (Kaiming) initialization to all linear, conv, and transpose conv layers.
-        """
-        for m in self.modules():
-            if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
-                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
-                if m.bias is not None:
-                    nn.init.zeros_(m.bias)
+
 
         # Quantizer
         self.quantizer = VectorQuantizer(num_embeddings, embedding_dim)
@@ -50,7 +43,17 @@ class VQVAE(nn.Module):
             nn.LeakyReLU(0.001),
             nn.ConvTranspose1d(64, num_points * 3, kernel_size=1)
         )
-
+        self._init_weights()
+        
+    def _init_weights(self):
+        """
+        Applies He (Kaiming) initialization to all linear, conv, and transpose conv layers.
+        """
+        for m in self.modules():
+            if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
+                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)        
     def forward(self, x):
         """
         Forward pass through the VQVAE.
