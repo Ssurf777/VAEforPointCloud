@@ -29,6 +29,15 @@ class VQVAE(nn.Module):
             nn.Conv1d(128, embedding_dim, kernel_size=1),
             nn.AdaptiveMaxPool1d(1)
         )
+    def _init_weights(self):
+        """
+        Applies He (Kaiming) initialization to all linear, conv, and transpose conv layers.
+        """
+        for m in self.modules():
+            if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
+                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
 
         # Quantizer
         self.quantizer = VectorQuantizer(num_embeddings, embedding_dim)
@@ -131,14 +140,3 @@ class VectorQuantizer(nn.Module):
         z_quantized = z + (z_quantized - z).detach()
 
         return z_quantized, quantization_loss
-
-    def _init_weights(self):
-        """
-        Applies He initialization (Kaiming initialization) to all linear,
-        convolution, and transpose convolution layers in this module.
-        """
-        for m in self.modules():
-            if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
-                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
-                if m.bias is not None:
-                    nn.init.zeros_(m.bias)
