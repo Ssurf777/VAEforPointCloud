@@ -71,9 +71,11 @@ class VQVAE(nn.Module):
         Returns:
             torch.Tensor: The reconstructed output.
         """
-        if z.dim() == 2:  # Add dimension if necessary
+        if z.dim() == 2:  # Add a channel dimension if necessary
             z = z.unsqueeze(-1)
-        x_recon = self.decoder(z)
+        x_recon = self.decoder(z)  # [batch_size, num_points*3, 1]
+        x_recon = x_recon.squeeze(-1).view(-1, self.num_points, 3)  # [batch_size, num_points, 3]
+
         return x_recon
 
 class VectorQuantizer(nn.Module):
