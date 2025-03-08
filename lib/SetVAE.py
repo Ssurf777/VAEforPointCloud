@@ -20,17 +20,18 @@ class SetVAE(nn.Module):
         self.dec_linear1 = nn.Linear(n_z, 1024)
         self.dec_linear2 = nn.Linear(1024, num_points * dim_input)
 
+        # 重みの初期化
+        self._init_weights()
+
     def encode(self, x):
-        # x: (B, num_points, dim_input)
-        device = x.device
         x = self.isab(x)
-        x = x.mean(dim=1)  # 集合の特徴を平均で集約
+        x = x.mean(dim=1)
 
         mu = self.linear_mu(x)
         logvar = self.linear_logvar(x)
 
         std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std).to(device)
+        eps = torch.randn_like(std)
         z = mu + eps * std
 
         return z, mu, logvar
@@ -46,10 +47,9 @@ class SetVAE(nn.Module):
         y = self.decode(z)
         return y, z, mu, logvar
 
-
     def loss(self, y, x, mu, logvar):
-        rec_loss = F.mse_loss(y, x, reduction="sum")  # 再構成誤差をMSEで計算
-        reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)  # 正則化項
+        rec_loss = F.mse_loss(y, x, reduction="sum")
+        reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)
         return rec_loss, reg_loss
 
     def _init_weights(self):
