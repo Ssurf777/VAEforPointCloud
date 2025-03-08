@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ISAB import ISAB  # ’ñ‹Ÿ‚¢‚½‚¾‚¢‚½ISABƒ‚ƒWƒ…[ƒ‹‚ğg—p
+from ISAB import ISAB
 
 class SetVAE(nn.Module):
     def __init__(self, num_points=5000, n_z=3, dim_input=3, dim_hidden=128, num_heads=4, num_inds=32):
@@ -24,7 +24,7 @@ class SetVAE(nn.Module):
         # x: (B, num_points, dim_input)
         device = x.device
         x = self.isab(x)
-        x = x.mean(dim=1)  # W‡‚Ì“Á’¥‚ğ•½‹Ï‚ÅW–ñ
+        x = x.mean(dim=1)  # é›†åˆã®ç‰¹å¾´ã‚’å¹³å‡ã§é›†ç´„
 
         mu = self.linear_mu(x)
         logvar = self.linear_logvar(x)
@@ -43,5 +43,17 @@ class SetVAE(nn.Module):
 
     def forward(self, x):
         z, mu, logvar = self.encode(x)
-        recon_x = self.decode(z)
-        return recon_x, mu, logvar
+        y = self.decode(z)
+        return y, mu, logvar
+
+    def loss(self, y, x, mu, logvar):
+        rec_loss = F.mse_loss(y, x, reduction="sum")  # å†æ§‹æˆèª¤å·®ã‚’MSEã§è¨ˆç®—
+        reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)  # æ­£å‰‡åŒ–é …
+        return rec_loss, reg_loss
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
+                nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
