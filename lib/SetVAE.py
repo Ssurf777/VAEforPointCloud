@@ -44,7 +44,8 @@ class SetVAE(nn.Module):
     def forward(self, x):
         z, mu, logvar = self.encode(x)
         y = self.decode(z)
-        return y, mu, logvar
+        return y, z, mu, logvar
+
 
     def loss(self, y, x, mu, logvar):
         rec_loss = F.mse_loss(y, x, reduction="sum")  # 再構成誤差をMSEで計算
