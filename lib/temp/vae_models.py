@@ -14,8 +14,8 @@ class standVAE(nn.Module):
         self.linear1 = nn.Linear(1024, 512)
         self.linear2 = nn.Linear(512, 256)
         self.linear3 = nn.Linear(256, 9)
-        self.enc_mu = nn.Linear(9, n_z)         # •½‹Ï (mu)
-        self.enc_logvar = nn.Linear(9, n_z)    # ‘Î”•ªU (logvar)
+        self.enc_mu = nn.Linear(9, n_z)         # å¹³å‡ (mu)
+        self.enc_logvar = nn.Linear(9, n_z)    # å¯¾æ•°åˆ†æ•£ (logvar)
 
         # Decoder
         self.dec1 = nn.Linear(n_z, 1024)
@@ -44,9 +44,9 @@ class standVAE(nn.Module):
         x = F.leaky_relu(self.linear2(x), negative_slope=0.001)
         x = self.linear3(x)
 
-        mu = self.enc_mu(x)              # •½‹Ï (mu) ‚ÌŒvZ
-        logvar = self.enc_logvar(x)      # ‘Î”•ªU (logvar) ‚ÌŒvZ
-        std = torch.exp(0.5 * logvar)    # •W€•Î· (std)
+        mu = self.enc_mu(x)              # å¹³å‡ (mu) ã®è¨ˆç®—
+        logvar = self.enc_logvar(x)      # å¯¾æ•°åˆ†æ•£ (logvar) ã®è¨ˆç®—
+        std = torch.exp(0.5 * logvar)    # æ¨™æº–åå·® (std)
 
         # Reparameterization trick for sampling z
         eps = torch.randn_like(std).to(device)
@@ -55,7 +55,7 @@ class standVAE(nn.Module):
         return z, mu, logvar
 
     def decode(self, z):
-        device = z.device  # ƒfƒoƒCƒX‚ğæ“¾
+        device = z.device  # ãƒ‡ãƒã‚¤ã‚¹ã‚’å–å¾—
         z = z.squeeze(0)
         z = torch.cat([z], dim=-1)
         x = F.leaky_relu(self.dec1(z), negative_slope=0.001)
@@ -64,14 +64,14 @@ class standVAE(nn.Module):
         x = F.leaky_relu(self.dconv1(x), negative_slope=0.001)
         x = F.leaky_relu(self.dconv2(x), negative_slope=0.001)
         x = x.squeeze(0).squeeze(-1)
-        x = self.dec_out(x)  # ÅI“I‚Èo—Í‘w
+        x = self.dec_out(x)  # æœ€çµ‚çš„ãªå‡ºåŠ›å±¤
         return x
 
     def loss(self, y, x, mu, logvar):
-        device = y.device  # ƒfƒoƒCƒX‚ğæ“¾
+        device = y.device  # ãƒ‡ãƒã‚¤ã‚¹ã‚’å–å¾—
         x_reordered = y.view(3, -1).transpose(0, 1)
-        rec_loss = F.mse_loss(y, x, reduction="sum")  # Ä\¬Œë·‚ğMSE‚ÅŒvZ
-        reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)  # ³‘¥‰»€
+        rec_loss = F.mse_loss(y, x, reduction="sum")  # å†æ§‹æˆèª¤å·®ã‚’MSEã§è¨ˆç®—
+        reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)  # æ­£å‰‡åŒ–é …
         return rec_loss, reg_loss
 
     def _init_weights(self):
