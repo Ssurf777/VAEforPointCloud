@@ -29,7 +29,7 @@ VAEforPointCloud/
 
 ~~~
 
-~~~
+
 | Architecture | VAE | MoG-VAE | MoG-VAE | SetVAE | VQ-VAE |
 |-------------|----------------|----------------|--------------------|----------------|---------------------------|
 | Loss        | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + KLD | MSE + Codebook + Commitment |
@@ -56,4 +56,3 @@ VAEforPointCloud/
 | Design 9 | 0.0197 | 0.0200 | 0.0130 | 0.0100 | 0.0175 |
 | **Average** | **0.0233** | **0.0155** | **0.0136** | **0.0133** | **0.0093** |
 
-~~~
