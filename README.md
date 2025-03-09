@@ -31,9 +31,11 @@ VAEforPointCloud/
 
 
 | Architecture | VAE | MoG-VAE | MoG-VAE | SetVAE | VQ-VAE |
-|-------------|----------------|----------------|--------------------|----------------|---------------------------|
-| Loss        | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + KLD | MSE + Codebook + Commitment |
-| Learning Rate | 1.0E-05 | 1.0E-05 | 1.0E-05 | 1.0E-04 | 5.0E-05 | 1.0E-03 |
+|-------------|--------------------------|------------------|--------------------|-------------------------------|---------------------------|
+| **Encoder** | Pointwise Conv + Max Pooling | Same as Left | Same as Left | Induced Set Attention Block | Pointwise Conv + Max Pooling |
+| **Decoder** | Deconvolution (Transpose Conv) | Same as Left | Same as Left | Same as Left | Same as Left |
+| **Loss**    | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + KLD | MSE + Codebook + Commitment |
+| **Learning Rate** | 1.0E-05 | 1.0E-05 | 1.0E-05 | 1.0E-04 | 5.0E-05 | 1.0E-03 |
 | **CD** |  |  |  |  |  |
 | Design 1 | 0.0245 | 0.0247 | 0.0145 | 0.0239 | 0.0188 |
 | Design 2 | 0.0247 | 0.0226 | 0.0154 | 0.0187 | 0.0208 |
