@@ -27,6 +27,9 @@ VAEforPointCloud/
 ├── requirements.txt                    # List of required Python packages
 └── README.md                           # Project description
 
+~~~
+
+~~~
 | Architecture | VAE | MoG-VAE | MoG-VAE | SetVAE | VQ-VAE |
 |-------------|----------------|----------------|--------------------|----------------|---------------------------|
 | Loss        | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + KLD | MSE + Codebook + Commitment |
