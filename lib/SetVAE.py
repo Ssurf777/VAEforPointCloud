@@ -69,12 +69,11 @@ class SetVAE(nn.Module):
     def loss2(self, y, x, mu, logvar):
         batch_size = x.size(0)
         mse_loss = F.mse_loss(y, x, reduction="sum")
-        # Reshape for Chamfer distance calculation to (N, 3)
         x_reshaped = x.view(-1, 3)
         y_reshaped = y.view(-1, 3)
-        rec_loss = self.chamfer_distance(x_reshaped, y_reshaped)
-        reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1) / batch_size
-        return mse_loss, rec_loss, reg_loss
+        chamfer_loss = self.chamfer_distance(x_reshaped, y_reshaped)
+        reg_loss = 0.5 * torch.sum(mu ** 2 + torch.exp(logvar) - logvar - 1) / batch_size
+        return mse_loss, chamfer_loss, reg_loss
     
     def _init_weights(self):
         for m in self.modules():
