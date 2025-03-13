@@ -66,7 +66,7 @@ class SetVAE(nn.Module):
         chamfer_dist = min_dist_x_to_y + min_dist_y_to_x
         return chamfer_dist.mean()
 
-    def loss2(self, y, x):
+    def loss2(self, y, x, mu, logvar):
         batch_size = x.size(0)
         mse_loss = F.mse_loss(y, x, reduction="sum")
         # Reshape for Chamfer distance calculation to (N, 3)
