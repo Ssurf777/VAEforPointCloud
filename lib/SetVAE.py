@@ -51,7 +51,31 @@ class SetVAE(nn.Module):
         rec_loss = F.mse_loss(y, x, reduction="sum")
         reg_loss = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)
         return rec_loss, reg_loss
+        
+    @staticmethod
+    def chamfer_distance(x, y):
+        # If the shapes of x, y are (N, 3), add a batch dimension
+        if x.dim() == 2:
+            x = x.view(1, x.size(0), x.size(1))
+            y = y.view(1, y.size(0), y.size(1))
+        x = x.unsqueeze(1)  # (B, 1, N, 3)
+        y = y.unsqueeze(2)  # (B, M, 1, 3)
+        dist = torch.norm(x - y, dim=-1)
+        min_dist_x_to_y = torch.min(dist, dim=1)[0].mean(dim=1)
+        min_dist_y_to_x = torch.min(dist, dim=2)[0].mean(dim=1)
+        chamfer_dist = min_dist_x_to_y + min_dist_y_to_x
+        return chamfer_dist.mean()
 
+    def loss2(self, y, x):
+        batch_size = x.size(0)
+        mse_loss = F.mse_loss(y, x, reduction="sum")
+        # Reshape for Chamfer distance calculation to (N, 3)
+        x_reshaped = x.view(-1, 3)
+        y_reshaped = y.view(-1, 3)
+        rec_loss = self.chamfer_distance(x_reshaped, y_reshaped)
+        reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1) / batch_size
+        return mse_loss, rec_loss, reg_loss
+    
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, (nn.Linear, nn.Conv1d, nn.ConvTranspose1d)):
