@@ -34,7 +34,7 @@ VAEforPointCloud/
 |-------------|--------------------------|------------------|--------------------|-------------------------------|---------------------------|
 | **Encoder** | Pointwise Conv + Max Pooling | Same as Left | Same as Left | Induced Set Attention Block | Pointwise Conv + Max Pooling |
 | **Decoder** | Deconvolution (Transpose Conv) | Same as Left | Same as Left | Same as Left | Same as Left |
-| **Loss**    | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + KLD | MSE + Codebook + Commitment |
+| **Loss**    | MSE + KLD | MSE + KLD | MSE + 2 × CD + KLD | MSE + 0.8 * KLD | MSE + Codebook + Commitment |
 | **Learning Rate** | 1.0E-05 | 1.0E-05 | 1.0E-05 | 1.0E-04 | 5.0E-05 | 1.0E-03 |
 | **CD** |  |  |  |  |  |
 | Design 1 | 0.0245 | 0.0247 | 0.0145 | 0.0239 | 0.0188 |
