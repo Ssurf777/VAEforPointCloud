@@ -73,7 +73,7 @@ class SetVAE(nn.Module):
         x_reshaped = x.view(-1, 3)
         y_reshaped = y.view(-1, 3)
         rec_loss = self.chamfer_distance(x_reshaped, y_reshaped)
-        reg_loss = 0.5 * torch.sum(self.mu ** 2 + torch.exp(self.logvar) - self.logvar - 1) / batch_size
+        reg_loss = 0.5 * torch.sum(mu ** 2 + torch.exp(logvar) - logvar - 1) / batch_size
         return mse_loss, rec_loss, reg_loss
     
     def _init_weights(self):
