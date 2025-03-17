@@ -37,9 +37,16 @@ class ISAB_VQVAE(nn.Module):
                     nn.init.zeros_(m.bias)
 
     def encode(self, x):
+        print(f"Input x shape: {x.shape}")  # 確認
+        print("permute")
+        x = x.permute(0, 2, 1) #(batch_size, num_points, dim_input)
+        print(f"Permuted x shape: {x.shape}") 
         x = self.isab(x)
+        print(f"ISAB output shape: {x.shape}")  # ここで形状を確認
         x = x.mean(dim=1)  # Global feature representation
+        print(f"After mean shape: {x.shape}")  # ここで形状を確認
         z = self.fc_enc(x)  # Project to latent space
+        print(f"fc_enc output shape: {z.shape}")  # ここで形状を確認
         z_quantized, quantization_loss = self.quantizer(z)
         return z, z_quantized, quantization_loss
 
