@@ -48,10 +48,13 @@ class StackedDPFDecoder(nn.Module):
         ])
 
     def forward(self, z):
+        # 同じ潜在変数 z をすべての Flow に渡す
         x = None
         for flow in self.flow_blocks:
-            x = flow(z) if x is None else flow(x)
+            x = flow(z)
         return x
+
+
 
 # Chamfer Distance
 def chamfer_distance(p1, p2):
