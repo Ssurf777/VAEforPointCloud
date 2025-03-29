@@ -87,3 +87,6 @@ class PointNet_DPF_Model(nn.Module):
         x_recon = self.forward(x_input)   # (B, M, 3)
         loss = chamfer_distance(x_recon, x_target)
         return loss, x_recon
+        
+    def decode(self, z):
+        return self.decoder(z)
