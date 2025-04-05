@@ -86,3 +86,39 @@ def prepare_data_for_ISAB(file_names, num_points=5000, device='cuda'):
     input_data = np.stack(input_data_list)  # Shape: (num_samples, num_points, 3)
     input_tensor = torch.tensor(input_data, dtype=torch.float32).to(device)
     return DataLoader(TensorDataset(input_tensor), batch_size=1, shuffle=False)
+
+def prepare_data_from_stl(file_names, num_points=5000, device='cuda'):
+    """
+    Loads and preprocesses point cloud data from ASCII STL files.
+    Extracts vertices from STL faces, normalizes them, and returns a DataLoader.
+
+    Args:
+        file_names (list of str): List of ASCII STL file paths.
+        num_points (int): Number of points to sample from each file.
+        device (str): 'cuda' or 'cpu'.
+
+    Returns:
+        DataLoader: DataLoader containing normalized point cloud tensors.
+    """
+    input_data_list = []
+
+    for file_name in file_names:
+        with open(file_name, 'r') as f:
+            verts, faces = read_stl_text(f)
+            verts_array = np.array(verts)
+
+            if verts_array.shape[0] < num_points:
+                raise ValueError(f"{file_name}: not enough vertices ({verts_array.shape[0]}) for sampling {num_points}")
+
+            sampled_idx = np.random.choice(verts_array.shape[0], num_points, replace=False)
+            pointcloud = verts_array[sampled_idx]
+
+            # Normalize each dimension to [0, 1]
+            pointcloud = (pointcloud - pointcloud.min(axis=0)) / (pointcloud.max(axis=0) - pointcloud.min(axis=0))
+
+            input_data_list.append(pointcloud)
+
+    input_data = np.stack(input_data_list)  # (N_samples, N_points, 3)
+    input_tensor = torch.tensor(input_data, dtype=torch.float32).to(device)
+
+    return DataLoader(TensorDataset(input_tensor), batch_size=1, shuffle=False)
